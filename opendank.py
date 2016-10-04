@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+import sys
 import os
 import glob
 import datetime
@@ -8,61 +9,82 @@ import Tkinter as tk
 import time
 from PIL import ImageTk, Image
 
-def fetch_images():
-    r = praw.Reddit(user_agent='funny')
-    submissions = r.get_subreddit('pics').get_hot(limit=20)
-    image_names = []
-    imageId = 0
-    for x in submissions:
-        if "i.imgur.com/" in x.url or "i.reddituploads.com/" in x.url:
-            response = requests.get(x.url)
-            if response.status_code == 200:
-                with open("image" + str(imageId), 'wb') as img:
-                    for chunk in response.iter_content(4096):
-                        img.write(chunk)
-                image_names.append('image' + str(imageId))
-                imageId += 1
-    return image_names
+class ImageDiashow:
+    def __init__(self, subreddit='earthporn', max_items=20, image_prefix='image', valid_hosts=['i.imgur.com/', 'i.reddituploads.com/', 'i.redd.it/']):
+        self.active = 0
+        self.max_items = max_items
+        self.subreddit = subreddit
+        self.image_prefix = image_prefix
+        self.valid_hosts = valid_hosts
+        self.last_fetch_date = datetime.date.fromtimestamp(0)
+        self.client = praw.Reddit(user_agent='opendank')
 
-def create_window():
-    window = tk.Tk()
-    window.attributes('-fullscreen', True)
-    window.title('opendank')
+        self.window = tk.Tk()
+        self.window.attributes('-fullscreen', True)
+        self.window.title('opendank')
+        self.window.update()
+        self.width = self.window.winfo_width()
+        self.height = self.window.winfo_height()
+        self.panel = tk.Label(self.window)
+        self.panel.pack(side = 'bottom', fill = 'both', expand = 'yes')
 
-    panel = tk.Label(window)
-    panel.pack(side = "bottom", fill = "both", expand = "yes")
-    return window, panel
+    def store_image(self, url, filename):
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(filename, 'wb') as image:
+                for chunk in response.iter_content(2**16):
+                    image.write(chunk)
+            return True
+        return False
 
-def clean_up():
-    for filename in glob.glob("image*"):
-        os.remove(filename)
+    def fetch_images(self):
+        self.images = []
 
-def display_image(panel, name):
-    photo = Image.open(name)
-    photo.thumbnail((window.winfo_width(), window.winfo_height()), Image.ANTIALIAS)
-    img = ImageTk.PhotoImage(photo)
-    panel.configure(image = img)
-    panel.image = img
+        hot_submissions = self.client.get_subreddit(self.subreddit).get_hot(limit=self.max_items)
+        current_image = 0
+        for submission in hot_submissions:
+            if any(host in submission.url for host in self.valid_hosts):
+                image_path = self.image_prefix + str(current_image)
+                print("Fetching image %d from %s" % (current_image, submission.url))
+                if self.store_image(submission.url, image_path):
+                    self.images.append(image_path)
+                    current_image += 1
 
-def update_window():
-    global active_id
-    global last_check_date
-    global images
+    def clear_cache(self):
+        for filename in glob.glob(self.image_prefix + '*'):
+            os.remove(filename)
 
-    current_date = datetime.date.today()
-    if current_date.day != last_check_date.day:
-        clean_up()
-        images = fetch_images()
-        last_check_date = current_date
+    def display_active(self):
+        photo = Image.open(self.images[self.active])
+        target_size = (self.width, self.height)
+        photo.thumbnail(target_size, Image.ANTIALIAS)
+        image = ImageTk.PhotoImage(photo)
+        self.panel.configure(image = image)
+        self.panel.image = image
 
-    active_id = (active_id + 1) % len(images)
-    display_image(panel, images[active_id])
-    window.after(1000, update_window)
+    def update(self):
+        current_date = datetime.date.today()
+        if current_date.day != self.last_fetch_date.day:
+            self.clear_cache()
+            self.fetch_images()
+            self.last_fetch_date = current_date
+        self.active = (self.active + 1) % len(self.images)
+        self.display_active()
+        self.window.after(1000, self.update)
 
-last_check_date = datetime.date.fromtimestamp(0)
-active_id = 0
-images = []
-window, panel = create_window()
-update_window()
-window.mainloop()
+    def destroy(self):
+        self.window.destroy()
+        self.clear_cache()
+        sys.exit(0)
+
+    def start(self):
+        self.update()
+        self.window.mainloop()
+
+def main():
+    diashow = ImageDiashow()
+    diashow.start()
+
+if __name__ == "main":
+    main()
 
