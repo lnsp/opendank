@@ -10,7 +10,8 @@ import time
 from PIL import ImageTk, Image
 
 class ImageDiashow:
-    def __init__(self, subreddit='earthporn', max_items=20, image_prefix='image', valid_hosts=['i.imgur.com/', 'i.reddituploads.com/', 'i.redd.it/']):
+    def __init__(self, subreddit='earthporn', max_items=20, image_prefix='image', valid_hosts=['i.imgur.com/', 'i.reddituploads.com/', 'i.redd.it/'], update_interval=10000):
+        self.update_interval = update_interval
         self.active = 0
         self.max_items = max_items
         self.subreddit = subreddit
@@ -42,13 +43,17 @@ class ImageDiashow:
 
         hot_submissions = self.client.get_subreddit(self.subreddit).get_hot(limit=self.max_items)
         current_image = 0
+
+        sys.stdout.write('Fetching images: [')
         for submission in hot_submissions:
             if any(host in submission.url for host in self.valid_hosts):
                 image_path = self.image_prefix + str(current_image)
-                print("Fetching image %d from %s" % (current_image, submission.url))
+                sys.stdout.write('-')
+                sys.stdout.flush()
                 if self.store_image(submission.url, image_path):
                     self.images.append(image_path)
                     current_image += 1
+        print(']')
 
     def clear_cache(self):
         for filename in glob.glob(self.image_prefix + '*'):
@@ -70,21 +75,21 @@ class ImageDiashow:
             self.last_fetch_date = current_date
         self.active = (self.active + 1) % len(self.images)
         self.display_active()
-        self.window.after(1000, self.update)
+        self.window.after(self.update_interval, self.update)
 
-    def destroy(self):
+    def destroy(self, event):
         self.window.destroy()
         self.clear_cache()
         sys.exit(0)
 
     def start(self):
         self.update()
+        self.window.bind("<Escape>", self.destroy)
         self.window.mainloop()
 
 def main():
     diashow = ImageDiashow()
     diashow.start()
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
-
