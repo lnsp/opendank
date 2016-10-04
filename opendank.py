@@ -12,7 +12,7 @@ def fetch_images():
     image_names = []
     imageId = 0
     for x in submissions:
-        if "i.imgur.com/" in x.url:
+        if "i.imgur.com/" in x.url or "i.reddituploads.com/" in x.url:
             response = requests.get(x.url)
             if response.status_code == 200:
                 with open("image" + str(imageId), 'wb') as img:
@@ -32,7 +32,9 @@ def create_window():
     return window, panel
 
 def display_image(panel, name):
-    img = ImageTk.PhotoImage(Image.open(name))
+    photo = Image.open(name)
+    photo.thumbnail((window.winfo_width(), window.winfo_height()), Image.ANTIALIAS)
+    img = ImageTk.PhotoImage(photo)
     panel.configure(image = img)
     panel.image = img
 
@@ -48,7 +50,7 @@ def update_window():
 
     active_id = (active_id + 1) % len(images)
     display_image(panel, images[active_id])
-    window.after(10000, update_window)
+    window.after(1000, update_window)
 
 last_check_date = datetime.date.fromtimestamp(0)
 active_id = 0
