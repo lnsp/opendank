@@ -7,6 +7,7 @@ from PIL import ImageTk, Image
 def fetch_images():
     r = praw.Reddit(user_agent='funny')
     submissions = r.get_subreddit('pics').get_hot(limit=20)
+    image_names = []
     imageId = 0
     for x in submissions:
         if "i.imgur.com/" in x.url:
@@ -15,8 +16,9 @@ def fetch_images():
                 with open("image" + str(imageId), 'wb') as img:
                     for chunk in response.iter_content(4096):
                         img.write(chunk)
+                image_names.append('image' + str(imageId))
                 imageId += 1
-    return imageId
+    return image_names
 
 def display_image(name):
     window = tk.Tk()
@@ -29,6 +31,6 @@ def display_image(name):
 
     window.mainloop()
 
-image_count = fetch_images()
-display_image('image' + str(image_count-1))
+images = fetch_images()
+display_image(images[0])
 
