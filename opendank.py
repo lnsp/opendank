@@ -1,7 +1,8 @@
 #!/usr/bin/python2
 import praw
 import requests
-from PIL import Image
+import Tkinter as tk
+from PIL import ImageTk, Image
 
 def fetch_images():
     r = praw.Reddit(user_agent='funny')
@@ -17,5 +18,17 @@ def fetch_images():
                 imageId += 1
     return imageId
 
-fetch_images()
+def display_image(name):
+    window = tk.Tk()
+    window.attributes('-fullscreen', True)
+    window.title('opendank')
+
+    img = ImageTk.PhotoImage(Image.open(name))
+    panel = tk.Label(window, image = img)
+    panel.pack(side = "bottom", fill = "both", expand = "yes")
+
+    window.mainloop()
+
+image_count = fetch_images()
+display_image('image' + str(image_count-1))
 
