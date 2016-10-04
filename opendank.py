@@ -2,6 +2,7 @@
 import praw
 import requests
 import Tkinter as tk
+import time
 from PIL import ImageTk, Image
 
 def fetch_images():
@@ -20,17 +21,30 @@ def fetch_images():
                 imageId += 1
     return image_names
 
-def display_image(name):
+def create_window():
     window = tk.Tk()
     window.attributes('-fullscreen', True)
     window.title('opendank')
 
-    img = ImageTk.PhotoImage(Image.open(name))
-    panel = tk.Label(window, image = img)
+    panel = tk.Label(window)
     panel.pack(side = "bottom", fill = "both", expand = "yes")
+    return window, panel
 
-    window.mainloop()
+def display_image(panel, name):
+    img = ImageTk.PhotoImage(Image.open(name))
+    panel.configure(image = img)
+    panel.image = img
 
+def update_window():
+    global active_id
+    active_id = (active_id + 1) % len(images)
+    display_image(panel, images[active_id])
+    window.after(1000, update_window)
+
+last_check_date = 0
+active_id = 0
 images = fetch_images()
-display_image(images[0])
+window, panel = create_window()
+update_window()
+window.mainloop()
 
