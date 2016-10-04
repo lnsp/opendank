@@ -1,4 +1,6 @@
 #!/usr/bin/python2
+import os
+import glob
 import datetime
 import praw
 import requests
@@ -31,6 +33,10 @@ def create_window():
     panel.pack(side = "bottom", fill = "both", expand = "yes")
     return window, panel
 
+def clean_up():
+    for filename in glob.glob("image*"):
+        os.remove(filename)
+
 def display_image(panel, name):
     photo = Image.open(name)
     photo.thumbnail((window.winfo_width(), window.winfo_height()), Image.ANTIALIAS)
@@ -45,6 +51,7 @@ def update_window():
 
     current_date = datetime.date.today()
     if current_date.day != last_check_date.day:
+        clean_up()
         images = fetch_images()
         last_check_date = current_date
 
