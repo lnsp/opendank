@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+import datetime
 import praw
 import requests
 import Tkinter as tk
@@ -37,13 +38,21 @@ def display_image(panel, name):
 
 def update_window():
     global active_id
+    global last_check_date
+    global images
+
+    current_date = datetime.date.today()
+    if current_date.day != last_check_date.day:
+        images = fetch_images()
+        last_check_date = current_date
+
     active_id = (active_id + 1) % len(images)
     display_image(panel, images[active_id])
-    window.after(1000, update_window)
+    window.after(10000, update_window)
 
-last_check_date = 0
+last_check_date = datetime.date.fromtimestamp(0)
 active_id = 0
-images = fetch_images()
+images = []
 window, panel = create_window()
 update_window()
 window.mainloop()
