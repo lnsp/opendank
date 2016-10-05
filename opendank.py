@@ -10,15 +10,13 @@ import time
 from PIL import ImageTk, Image
 
 class ImageDiashow:
-    def __init__(self, subreddit='earthporn', max_items=20, image_prefix='image', valid_hosts=['i.imgur.com/', 'i.reddituploads.com/', 'i.redd.it/'], update_interval=10000):
+    def __init__(self, image_prefix='image', update_interval=10000):
         self.update_interval = update_interval
         self.active = 0
-        self.max_items = max_items
-        self.subreddit = subreddit
+        self.sources = []
         self.image_prefix = image_prefix
-        self.valid_hosts = valid_hosts
         self.last_fetch_date = datetime.date.fromtimestamp(0)
-        self.client = praw.Reddit(user_agent='opendank')
+        
 
         self.window = tk.Tk()
         self.window.attributes('-fullscreen', True)
@@ -38,21 +36,25 @@ class ImageDiashow:
             return True
         return False
 
+    def add_source(self, obj):
+        self.sources.append(obj)
+
     def fetch_images(self):
         self.images = []
-
-        hot_submissions = self.client.get_subreddit(self.subreddit).get_hot(limit=self.max_items)
+        image_urls = []
+        for source in self.sources:
+            image_urls += source.fetch_images()
         current_image = 0
 
         sys.stdout.write('Fetching images: [')
-        for submission in hot_submissions:
-            if any(host in submission.url for host in self.valid_hosts):
-                image_path = self.image_prefix + str(current_image)
-                sys.stdout.write('-')
-                sys.stdout.flush()
-                if self.store_image(submission.url, image_path):
-                    self.images.append(image_path)
-                    current_image += 1
+
+        for url in image_urls:
+            image_path = self.image_prefix + str(current_image)
+            sys.stdout.write('-')
+            sys.stdout.flush()
+            if self.store_image(url, image_path):
+                self.images.append(image_path)
+                current_image += 1
         print(']')
 
     def clear_cache(self):
@@ -86,10 +88,3 @@ class ImageDiashow:
         self.update()
         self.window.bind("<Escape>", self.destroy)
         self.window.mainloop()
-
-def main():
-    diashow = ImageDiashow()
-    diashow.start()
-
-if __name__ == "__main__":
-    main()
