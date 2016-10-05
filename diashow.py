@@ -9,8 +9,9 @@ import Tkinter as tk
 import time
 from PIL import ImageTk, Image
 
-class ImageDiashow:
+class Diashow:
     def __init__(self, image_prefix='image', update_interval=10000, quit_key='<Escape>'):
+        self.quit_key = quit_key
         self.update_interval = update_interval
         self.active = 0
         self.sources = []
@@ -35,8 +36,8 @@ class ImageDiashow:
             return True
         return False
 
-    def add_source(self, obj):
-        self.sources.append(obj)
+    def add_source(self, source_class):
+        self.sources.append(source_class())
 
     def fetch_images(self):
         self.images = []

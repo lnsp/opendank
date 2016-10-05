@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import urllib2
 import praw
 
-class RedditSource:
+class Reddit:
     def __init__(self, subreddit='pics', valid_hosts=['i.imgur.com/', 'i.reddituploads.com/', 'i.redd.it/'], max_items = 20):
         self.subreddit = subreddit
         self.valid_hosts = valid_hosts
@@ -28,7 +28,7 @@ class HtmlSource:
     def fetch_images():
         raise Exception('Abstract class: Don\'t use!!!')
 
-class XkcdSource(HtmlSource):
+class Xkcd(HtmlSource):
     def fetch_images(self):
         urls = []
         soup = self.get_soup('http://www.xkcd.com/')
@@ -39,7 +39,7 @@ class XkcdSource(HtmlSource):
         return urls
 
 
-class SysadminotaurSource(HtmlSource):
+class Sysadminotaur(HtmlSource):
     def fetch_images(self):
         urls = []
         soup = self.get_soup('http://sysadminotaur.com/')
