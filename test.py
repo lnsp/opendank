@@ -1,5 +1,5 @@
 from redditsource import RedditSource
-from opendank import ImageDiashow
+from diashow import ImageDiashow
 from comicsources import *
 
 dia = ImageDiashow()
