@@ -10,13 +10,12 @@ import time
 from PIL import ImageTk, Image
 
 class ImageDiashow:
-    def __init__(self, image_prefix='image', update_interval=10000):
+    def __init__(self, image_prefix='image', update_interval=10000, quit_key='<Escape>'):
         self.update_interval = update_interval
         self.active = 0
         self.sources = []
         self.image_prefix = image_prefix
         self.last_fetch_date = datetime.date.fromtimestamp(0)
-        
 
         self.window = tk.Tk()
         self.window.attributes('-fullscreen', True)
@@ -86,5 +85,5 @@ class ImageDiashow:
 
     def start(self):
         self.update()
-        self.window.bind("<Escape>", self.destroy)
+        self.window.bind(self.quit_key, self.destroy)
         self.window.mainloop()
