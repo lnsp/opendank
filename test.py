@@ -1,6 +1,5 @@
-from redditsource import RedditSource
+from sources import *
 from diashow import ImageDiashow
-from comicsources import *
 
 dia = ImageDiashow()
 dia.add_source(RedditSource())
