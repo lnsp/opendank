@@ -37,7 +37,7 @@ class Diashow:
         return False
 
     def add_source(self, source_class):
-        self.sources.append(source_class())
+        self.sources.append(source_class)
 
     def fetch_images(self):
         self.images = []
