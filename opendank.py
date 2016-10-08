@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 import diashow
+import sys
 import sources
 
 def main():

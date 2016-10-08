@@ -1,0 +1,1 @@
+http://xkcd.com > div : id = comic > img ! src prefix http:
