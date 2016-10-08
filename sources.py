@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import urllib2
+import requests
 import praw
 
 
@@ -33,9 +33,8 @@ class Reddit:
 class HtmlSource:
 
     def get_soup(self, url):
-        req = urllib2.Request(url, headers={'User-Agent': "Magic Browser"})
-        html_doc = urllib2.urlopen(req)
-        soup = BeautifulSoup(html_doc, 'html.parser')
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
         return soup
 
     def fetch_images():
