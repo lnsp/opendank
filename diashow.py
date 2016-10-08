@@ -9,8 +9,14 @@ import Tkinter as tk
 import time
 from PIL import ImageTk, Image
 
+
 class Diashow:
-    def __init__(self, image_prefix='image', update_interval=10000, quit_key='<Escape>'):
+
+    def __init__(
+            self,
+            image_prefix='image',
+            update_interval=10000,
+            quit_key='<Escape>'):
         self.quit_key = quit_key
         self.update_interval = update_interval
         self.active = 0
@@ -25,7 +31,7 @@ class Diashow:
         self.width = self.window.winfo_width()
         self.height = self.window.winfo_height()
         self.panel = tk.Label(self.window)
-        self.panel.pack(side = 'bottom', fill = 'both', expand = 'yes')
+        self.panel.pack(side='bottom', fill='both', expand='yes')
 
     def store_image(self, url, filename):
         response = requests.get(url)
@@ -66,7 +72,7 @@ class Diashow:
         target_size = (self.width, self.height)
         photo.thumbnail(target_size, Image.ANTIALIAS)
         image = ImageTk.PhotoImage(photo)
-        self.panel.configure(image = image)
+        self.panel.configure(image=image)
         self.panel.image = image
 
     def update(self):
