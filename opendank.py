@@ -11,7 +11,7 @@ def main():
     dia = diashow.Diashow()
     with file(sys.argv[1]) as f:
         for line in f:
-            dia.add_source(sources.CustomSource(line))
+            dia.add_source(sources.CustomSource(line.strip("\n")))
     dia.start()
 
 if __name__ == "__main__":
