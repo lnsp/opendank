@@ -5,7 +5,7 @@ setup(
     version="0.1",
     description="View images from the WWW in a diashow.",
     url="https://github.com/lnsp/opendank",
-    download_url="https://github.com/lnsp/opendank/tarball/0.1",
+    download_url="https://github.com/lnsp/opendank/archive/v0.1.tar.gz",
     author="the opendank community",
     author_email="lennart@mooxmirror.io",
     license="MIT",
