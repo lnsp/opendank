@@ -1,1 +1,2 @@
 http://xkcd.com > div : id = comic > img ! src prefix http:
+http://sysadminotaur.com : class = images : name = main ! src prefix http://sysadminotaur.com/
