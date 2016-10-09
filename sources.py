@@ -30,14 +30,14 @@ class Reddit:
         return images
 
 
-class HtmlSource:
+class HtmlSource(object):
 
     def get_soup(self, url):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         return soup
 
-    def fetch_images():
+    def fetch_images(self):
         raise Exception('Abstract class: Don\'t use!!!')
 
 
@@ -63,15 +63,28 @@ class Sysadminotaur(HtmlSource):
                 urls.append('http://sysadminotaur.com/' + content.get('src'))
         return urls
 
+
 class CustomSource(HtmlSource):
+
     def fetch_source(self, selection, tokens):
         results = []
         if tokens[0] == ">":
             for element in selection.find_all(tokens[1]):
                 results += self.fetch_source(element, tokens[2:])
         elif tokens[0] == ":":
-            for element in selection.find_all(attrs={tokens[1]: tokens[3]}):
-                results += self.fetch_source(element, tokens[4:])
+            attribute = tokens[1]
+            tokens = tokens[3:]
+            valid_qualifiers = []
+
+            while tokens[0] not in ['>', '!']:
+                valid_qualifiers.append(tokens[0])
+                tokens = tokens[1:]
+
+            for qualifier in valid_qualifiers:
+                for element in selection.find_all(
+                        attrs={attribute: qualifier}):
+                    results += self.fetch_source(element, tokens)
+
         elif tokens[0] == "!":
             value = selection[tokens[1]]
             tokens = tokens[2:]
