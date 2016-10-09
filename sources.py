@@ -1,29 +1,36 @@
+"""sources module provides URL extraction utilities for images from the WWW."""
 from bs4 import BeautifulSoup
 import requests
 import praw
 
 
-class Reddit:
+class Reddit(object):
+    """Reddit can fetch image urls from your favorite subreddit."""
+
+    # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
-            subreddit='pics',
-            valid_hosts=[
-                'i.imgur.com/',
-                'i.reddituploads.com/',
-                'i.redd.it/'],
+            subreddit="pics",
+            valid_hosts=None,
             max_items=20):
+        if valid_hosts is None:
+            valid_hosts = [
+                "i.imgur.com/",
+                "i.reddituploads.com/",
+                "i.redd.it/"]
+
         self.subreddit = subreddit
         self.valid_hosts = valid_hosts
         self.max_items = max_items
-        self.client = praw.Reddit(user_agent='opendank')
+        self.client = praw.Reddit(user_agent="opendank")
 
     def fetch_images(self):
+        """Fetch images from subreddit."""
         images = []
 
         hot_submissions = self.client.get_subreddit(
-            self.subreddit).get_hot(
-            limit=self.max_items)
+            self.subreddit).get_hot(limit=self.max_items)
         for submission in hot_submissions:
             if any(host in submission.url for host in self.valid_hosts):
                 images.append(submission.url)
@@ -31,42 +38,27 @@ class Reddit:
 
 
 class HtmlSource(object):
+    """HtmlSource can fetch a generic html request. Use this as a template for
+    your own sources."""
+
+    # pylint: disable=no-self-use
 
     def get_soup(self, url):
+        """Get a bowl full of HTML soup."""
         response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(response.text, "html.parser")
         return soup
 
     def fetch_images(self):
-        raise Exception('Abstract class: Don\'t use!!!')
-
-
-class Xkcd(HtmlSource):
-
-    def fetch_images(self):
-        urls = []
-        soup = self.get_soup('http://www.xkcd.com/')
-        for content in soup.find_all('div'):
-            if content.get('id') == 'comic':
-                for image in content.find_all('img'):
-                    urls.append('http:' + image.get('src'))
-        return urls
-
-
-class Sysadminotaur(HtmlSource):
-
-    def fetch_images(self):
-        urls = []
-        soup = self.get_soup('http://sysadminotaur.com/')
-        for content in soup.find_all('img'):
-            if content.get('name') == 'main':
-                urls.append('http://sysadminotaur.com/' + content.get('src'))
-        return urls
+        """Fetch image URLs from the HTML source."""
+        raise Exception("This is a template class, you should not use this method.")
 
 
 class CustomSource(HtmlSource):
+    """CustomSource parses a HTML source based on a descriptive selection string."""
 
     def fetch_source(self, selection, tokens):
+        """Uses the tokens to find something valuable in the selection."""
         results = []
         if tokens[0] == ">":
             for element in selection.find_all(tokens[1]):
@@ -76,7 +68,7 @@ class CustomSource(HtmlSource):
             tokens = tokens[3:]
             valid_qualifiers = []
 
-            while tokens[0] not in ['>', '!']:
+            while tokens[0] not in [">", "!"]:
                 valid_qualifiers.append(tokens[0])
                 tokens = tokens[1:]
 
@@ -98,7 +90,7 @@ class CustomSource(HtmlSource):
         return results
 
     def __init__(self, pattern):
-        self.tokens = pattern.split(' ')
+        self.tokens = pattern.split(" ")
 
     def fetch_images(self):
         soup = self.get_soup(self.tokens[0])

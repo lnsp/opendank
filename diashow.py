@@ -15,9 +15,9 @@ class Diashow(object):
 
     def __init__(
             self,
-            image_prefix='image',
+            image_prefix="image",
             update_interval=10000,
-            quit_key='<Escape>'):
+            quit_key="<Escape>"):
         self.quit_key = quit_key
         self.update_interval = update_interval
         self.active = 0
@@ -25,21 +25,22 @@ class Diashow(object):
         self.image_prefix = image_prefix
         self.last_fetch_date = datetime.date.fromtimestamp(0)
         self.images = []
+        self.store_mode = "wb"
 
         self.window = tk.Tk()
-        self.window.attributes('-fullscreen', True)
-        self.window.title('opendank')
+        self.window.attributes("-fullscreen", True)
+        self.window.title("opendank")
         self.window.update()
         self.width = self.window.winfo_width()
         self.height = self.window.winfo_height()
         self.panel = tk.Label(self.window)
-        self.panel.pack(side='bottom', fill='both', expand='yes')
+        self.panel.pack(side="bottom", fill="both", expand="yes")
 
     def store_image(self, url, filename):
         """Downloads an image from a specific url and stores it."""
         response = requests.get(url)
         if response.status_code == 200:
-            with open(filename, 'wb') as image:
+            with open(filename, self.store_mode) as image:
                 for chunk in response.iter_content(2**16):
                     image.write(chunk)
             return True
@@ -57,20 +58,20 @@ class Diashow(object):
             image_urls += source.fetch_images()
         current_image = 0
 
-        sys.stdout.write('Fetching images: [')
+        sys.stdout.write("Fetching images: [")
 
         for url in image_urls:
             image_path = self.image_prefix + str(current_image)
-            sys.stdout.write('-')
+            sys.stdout.write("-")
             sys.stdout.flush()
             if self.store_image(url, image_path):
                 self.images.append(image_path)
                 current_image += 1
-        print ']'
+        print "]"
 
     def clear_cache(self):
         """Remove stored image artifacts."""
-        for filename in glob.glob(self.image_prefix + '*'):
+        for filename in glob.glob(self.image_prefix + "*"):
             os.remove(filename)
 
     def display_active(self):
