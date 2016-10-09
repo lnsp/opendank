@@ -1,7 +1,7 @@
 #!/usr/bin/python2
-import diashow
 import sys
-import sources
+from opendank import diashow
+from opendank import sources
 
 def main():
     if len(sys.argv) < 2:

@@ -14,4 +14,5 @@ setup(
         "pillow",
         "bs4",
     ],
+    scripts=["bin/opendank"],
     zip_safe=False)
