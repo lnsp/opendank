@@ -5,7 +5,7 @@ import sources
 
 def main():
     if len(sys.argv) < 2:
-        print 'Missing configuration argument'
+        print "Usage: opendank [config-file]"
         return
 
     dia = diashow.Diashow()
